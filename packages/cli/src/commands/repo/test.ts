@@ -20,7 +20,7 @@ import fs from 'fs-extra';
 import yargs from 'yargs';
 import { resolve as resolvePath, relative as relativePath } from 'path';
 import { Command, OptionValues } from 'commander';
-import { Lockfile, PackageGraph } from '@backstage/cli-node';
+import { PackageGraph, detectPackageManager } from '@backstage/cli-node';
 import { paths } from '../../lib/paths';
 import { runCheck, runPlain } from '../../lib/run';
 import { isChildPath } from '@backstage/cli-common';
@@ -301,9 +301,8 @@ export async function command(opts: OptionValues, cmd: Command): Promise<void> {
       // This is called by `config/jest.js` after the project configs have been gathered
       async filterConfigs(projectConfigs, globalRootConfig) {
         const cache = await readCache(cacheDir);
-        const lockfile = await Lockfile.load(
-          paths.resolveTargetRoot('yarn.lock'),
-        );
+        const pacman = await detectPackageManager();
+        const lockfile = pacman.loadLockfile();
         const getPackageTreeHash = await readPackageTreeHashes(graph);
 
         // Base hash shared by all projects
@@ -384,7 +383,7 @@ export async function command(opts: OptionValues, cmd: Command): Promise<void> {
           }
         }
 
-        await writeCache(cacheDir, outputSuccessCache);
+        writeCache(cacheDir, outputSuccessCache);
       },
     };
   }

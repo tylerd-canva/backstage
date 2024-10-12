@@ -22,7 +22,7 @@ import { relative as relativePath, resolve as resolvePath } from 'path';
 import {
   PackageGraph,
   BackstagePackageJson,
-  Lockfile,
+  detectPackageManager,
 } from '@backstage/cli-node';
 import { paths } from '../../lib/paths';
 import { runWorkerQueueThreads } from '../../lib/parallel';
@@ -63,13 +63,15 @@ async function writeCache(dir: string, cache: Cache) {
 export async function command(opts: OptionValues, cmd: Command): Promise<void> {
   let packages = await PackageGraph.listTargetPackages();
 
+  const pacman = await detectPackageManager();
+
   const cacheDir = resolvePath(
     opts.successCacheDir ?? 'node_modules/.cache/backstage-cli',
   );
   const cacheContext = opts.successCache
     ? {
         cache: await readCache(cacheDir),
-        lockfile: await Lockfile.load(paths.resolveTargetRoot('yarn.lock')),
+        lockfile: await pacman.loadLockfile(),
       }
     : undefined;
 
