@@ -302,7 +302,7 @@ export async function command(opts: OptionValues, cmd: Command): Promise<void> {
       async filterConfigs(projectConfigs, globalRootConfig) {
         const cache = await readCache(cacheDir);
         const pacman = await detectPackageManager();
-        const lockfile = pacman.loadLockfile();
+        const lockfile = await pacman.loadLockfile();
         const getPackageTreeHash = await readPackageTreeHashes(graph);
 
         // Base hash shared by all projects
